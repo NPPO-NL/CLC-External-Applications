@@ -10,6 +10,12 @@ a list of tax_ids and filters the BLASTN results.
 import sys, getopt
 
 def command(argv):
+    '''
+    Get values for necessary parameters
+    :param argv:
+    :return: blastfile: path to BLAST table, taxafile: path to file with taxanomy numbers,
+    combofile: path to BLAST table with the selected organism, filterfile: path to BLAST table without the selected organism
+    '''
    blastfile = ''
    taxafile = ''
    combofile = ''
@@ -17,11 +23,11 @@ def command(argv):
    try:
       opts, args = getopt.getopt(argv,"hb:t:o:u:",["blastfile=","taxafile=","out1=","out2="])
    except getopt.GetoptError:
-      print 'filter.py -i <inputfile> -o <outputfile> -n <number> -m <minimum>'
+      print ('filter.py -i <inputfile> -o <outputfile> -n <number> -m <minimum>')
       sys.exit(2)
    for opt, arg in opts:
     if opt == '-h':
-         print 'chunker.py -b <inputfile> -t <outputfile> -o1 <number> -o2 <minimum>'
+         print ('chunker.py -b <inputfile> -t <outputfile> -o1 <number> -o2 <minimum>')
          sys.exit()
     elif opt in ("-b", "--ifile"):
          blastfile = arg
@@ -32,14 +38,27 @@ def command(argv):
     if opt in ("-u", "--minimum"):
         filterfile = arg
    return blastfile, taxafile, combofile, filterfile
-   
+
 def open_files(blastfile, taxafile):
+    '''
+    Open blastfile and taxafile
+    :param blastfile: path to BLAST table
+    :param taxafile: path to file with taxanomy numbers
+    :return: read_file1 = open blastfile, read_file2 = open taxafile
+    '''
     read_file1 = open(blastfile,"r")
     read_file2 = open(taxafile,"r")
 
     return read_file1, read_file2
 
 def find_taxa(read_file1, read_file2):
+    '''
+    Check taxonomic ID of first hit of a query with taxanomy numbers in taxanumbers.
+    If match > add whole BLAST table hit to filterstring. If not, add to combostring.
+    :param read_file1: open blastfile
+    :param read_file2: open taxafile
+    :return: filterstring: string with all BLAST hits from a specific taxonomy, combostring: string with all BLAST hits excluding a specific taxonomy
+    '''
     blastfile = read_file1.readlines()
     taxfile = read_file2.readlines()
     read_file1.close()
@@ -70,8 +89,16 @@ def find_taxa(read_file1, read_file2):
                 del blastfile[0]
                 
     return filterstring, combostring
-    
+
 def writefile(filterstring, combostring, filterfile, combofile):
+    '''
+    Write sequences to file
+    :param filterstring: string with all BLAST hits from a specific taxonomy
+    :param combostring: string with all BLAST hits excluding a specific taxonomy
+    :param filterfile: path to BLAST table without the selected organism
+    :param combofile: path to BLAST table with the selected organism
+    :return:
+    '''
     write_file1 = open(filterfile, "w")
     write_file2 = open(combofile, "w")
     write_file1.write(filterstring)
